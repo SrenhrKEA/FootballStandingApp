@@ -1,0 +1,8 @@
+Tiers:
+
+1. 12 tiers
+2. Each tier is composed of 12 teams
+3. They play 22 rounds internally after which the tier splits into an 
+	upper and lower fraction, each consisting of 6 teams.
+4. Each fraction then play additional 10 rounds internally, after which
+	the table is finished.
