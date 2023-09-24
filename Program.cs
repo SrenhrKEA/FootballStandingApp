@@ -23,6 +23,5 @@ class Program
         //     Console.WriteLine($"File {filePath} does not exist.");
         // }
         ResultsGenerator.GenerateResults(32);
-        // Calc.Qualification.Calculate();
     }
 }

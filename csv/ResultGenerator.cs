@@ -14,9 +14,12 @@ namespace Csv
             {
                 List<FootballMatch> matches = GenerateMatches(teams, i >= 11);
                 string fileName = $"round-{i}.csv";
+                string fileNameAlt = $"round-{i}-a.csv";
                 string fullPath = Path.Combine(directoryPath, fileName);
+                string fullPathAlt = Path.Combine(directoryPath, fileNameAlt);
 
-                WriteMatchesToFile(matches,fullPath,fileName);
+
+                WriteMatchesToFile(matches,fullPath,fileName,fullPathAlt,fileNameAlt);
 
                 // Rotate the teams for the next round
                 RotateTeams(teams);
@@ -27,11 +30,12 @@ namespace Csv
                 // Calculate the status after all iterations
                 teamStatus = Calc.Qualification.Calculate();
 
-                // // Iterate through the dictionary and print each key-value pair.
-                // foreach (var kvp in teamStatus)
-                // {
-                //     Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-                // }
+                Console.WriteLine("Qualifications:");
+                // Iterate through the dictionary and print each key-value pair.
+                foreach (var kvp in teamStatus)
+                {
+                    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+                }
             }
 
             if (iterations > 22)
@@ -67,9 +71,11 @@ namespace Csv
                     List<FootballMatch> relegationMatches = GenerateMatches(relegationTeams, i >= 5);
                     List<FootballMatch> matches = championshipMatches.Concat(relegationMatches).ToList();
                     string fileName = $"round-{i + 22}.csv";
+                    string fileNameAlt = $"round-{i + 22}-a.csv";
                     string fullPath = Path.Combine(directoryPath, fileName);
+                    string fullPathAlt = Path.Combine(directoryPath, fileNameAlt);
 
-                    WriteMatchesToFile(matches, fullPath, fileName);
+                    WriteMatchesToFile(matches,fullPath,fileName,fullPathAlt,fileNameAlt);
 
                     // Rotate the teams for the next round
                     RotateTeams(championshipTeams);
@@ -107,24 +113,44 @@ namespace Csv
             return matches;
         }
 
-        private static void WriteMatchesToFile(List<FootballMatch> matches, string fullPath, string fileName)
+        private static void WriteMatchesToFile(List<FootballMatch> matches, string fullPath, string fileName, string fullPathAlt, string fileNameAlt)
         {
+            List<FootballMatch> otherMatches = new List<FootballMatch>();
             try
             {
                 // Create a new file and add match results
                 using (StreamWriter writer = new StreamWriter(fullPath, true))
                 {
+                    writer.WriteLine($"Home team;Away team;Score;Other");
                     foreach (var match in matches)
                     {
+                        if (string.IsNullOrEmpty(match.Other))
                         writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score}");
+                        else
+                        otherMatches.Add(match);
                     }
                 }
 
                 Console.WriteLine($"File {fileName} created successfully!");
+
+                if (otherMatches.Count != 0)
+                {
+                    // Create a new file and add match results
+                    using (StreamWriter writer = new StreamWriter(fullPathAlt, true))
+                    {
+                        writer.WriteLine($"Home team;Away team;Score;Other");
+                        foreach (var match in otherMatches)
+                        {
+                            writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score};{match.Other}");
+                        }
+                    }
+
+                    Console.WriteLine($"File {fileNameAlt} created successfully!");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating file {fileName}. Error: {ex.Message}");
+                Console.WriteLine($"Error creating file {fileNameAlt}. Error: {ex.Message}");
             }
         }
 
