@@ -1,0 +1,31 @@
+Chatgpt chats:
+
+I started programming before reading the last few lines of the assignment, so I accidently deleted the rest of the chats.
+I mainly used chatgpt to help me generate match data based on the 7 rules.
+
+These are the chats I started after noticing my mistake.
+
+Asking it to clarify whether a method should be static or not:
+https://chat.openai.com/share/a193439e-e1c8-4c9c-b756-fb8be58449ff
+
+Asking it about whether to load files and pass the data to relevant methods or load on use:
+https://chat.openai.com/share/0bbf409c-b2c8-4ff8-8d88-3a8b3928334a
+
+Asking it to help me create the Result Class:
+https://chat.openai.com/share/d37a1147-490c-4560-a57b-d39e1348621a
+
+Asking it about certain warning messages:
+https://chat.openai.com/share/2cc7ddea-8f1e-4ad5-9c18-f5750e402dec
+
+Asking it to add comments to some of my classes:
+https://chat.openai.com/share/ed054670-7aa4-4df3-8945-70e0a189dcb2
+
+Asking it to help me sort a list:
+https://chat.openai.com/share/9791ad2f-43a0-45f5-a8e2-d26d5df7afa0
+
+Asking it to help me display the results:
+https://chat.openai.com/share/7bec3ac1-f3c7-4952-a460-397c0c26e5fa
+
+Asking it to help me organize myy classes and namespaces:
+https://chat.openai.com/share/e2f00e97-c741-4b73-9607-9db223977b91
+

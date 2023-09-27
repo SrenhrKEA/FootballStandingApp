@@ -1,0 +1,1 @@
+No tests where developed, as I instead made use of the GenerateData class, which provided me with data while upholding the 7 rules.
