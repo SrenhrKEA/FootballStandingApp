@@ -1,13 +1,13 @@
-using Csv; // Import the Csv namespace
+using Model;
 
-namespace Calc
+namespace Service
 {
     public class Result
     {
         // Process a specified number of rounds and return a list of teams with updated statistics.
         public static List<Team> ProcessRounds()
         {
-            List<Team> teams = Load.Teams(); // Loads the teams from a data source
+            List<Team> teams = LoadData.Teams(); // Loads the teams from a data source
             var streaks = new Dictionary<string, Queue<string>>(); // Initialize a dictionary to track streaks for each team
 
             int maxRounds = 32; // Maximum number of rounds to process

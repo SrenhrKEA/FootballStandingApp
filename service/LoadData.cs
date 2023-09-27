@@ -1,6 +1,8 @@
-namespace Csv
+using Model;
+
+namespace Service
 {
-    public class Load
+    public class LoadData
     {
         public static List<League> Setup()
         {

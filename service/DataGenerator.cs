@@ -1,4 +1,6 @@
-namespace Csv
+using Model;
+
+namespace Service
 {
     public class DataGenerator
     {
@@ -41,7 +43,7 @@ namespace Csv
             // After 22 rounds or more, calculate team qualification statuses
             if (numberOfRoundsPlayed >= 22)
             {
-                teamStatus = Calc.Qualification.ProcessRounds();
+                teamStatus = Qualification.ProcessRounds();
                 Console.WriteLine("Qualifications:");
                 foreach (var kvp in teamStatus)
                 {

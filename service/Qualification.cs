@@ -1,4 +1,4 @@
-namespace Calc
+namespace Service
 {
     public class Qualification
     {

@@ -1,4 +1,4 @@
-namespace Csv 
+namespace Model 
 {
     public class FootballMatch
     {
