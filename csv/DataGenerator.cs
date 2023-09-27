@@ -1,16 +1,26 @@
 namespace Csv
 {
-    public class ResultsGenerator
+    public class DataGenerator
     {
-        public static void GenerateResults(int iterations, string directoryPath = "./data/rounds")
+        public static void GenerateData(int numberOfRoundsPlayed, string directoryPath = "./data/rounds")
         {
-            Dictionary<string, string> teamStatus = new Dictionary<string, string>();
+            Dictionary<string, string> teamStatus = new();
 
-            DeleteFiles(directoryPath);
+            if (numberOfRoundsPlayed > 32) // Sets numberOfRoundsPlayed to 32 if larger.
+            {
+                numberOfRoundsPlayed = 32;
+            }
 
-            List<string> teams = File.ReadAllLines("./data/teams.csv").Skip(1).Select(line => line.Split(';')[0]).ToList();
+            // Deletes all .csv files in folder before creating new ones based on the current numberOfRoundsPlayed.
+            DeleteCSVFiles(directoryPath);
 
-            for (int i = 1; i <= Math.Min(iterations, 22); i++) // Limit the loop to 22 iterations or 'iterations' if less
+            List<string> teams = File.ReadAllLines("./data/teams.csv") // List of team abbreviations
+                .Skip(1)
+                .Select(line => line.Split(';')[0])
+                .ToList();
+
+            // Limit the loop to 22 numberOfRoundsPlayed or 'numberOfRoundsPlayed' if less
+            for (int i = 1; i <= Math.Min(numberOfRoundsPlayed, 22); i++)
             {
                 List<FootballMatch> matches = GenerateMatches(teams, i >= 11);
                 string fileName = $"round-{i}.csv";
@@ -18,31 +28,28 @@ namespace Csv
                 string fullPath = Path.Combine(directoryPath, fileName);
                 string fullPathAlt = Path.Combine(directoryPath, fileNameAlt);
 
-
-                WriteMatchesToFile(matches,fullPath,fileName,fullPathAlt,fileNameAlt);
+                WriteMatchesToFile(matches, fullPath, fileName, fullPathAlt, fileNameAlt);
 
                 // Rotate the teams for the next round
                 RotateTeams(teams);
             }
 
-            if (iterations >= 22)
+            if (numberOfRoundsPlayed >= 22)
             {
-                // Calculate the status after all iterations
-                teamStatus = Calc.Qualification.Calculate();
-
+                // Calculate the status after all numberOfRoundsPlayed
+                teamStatus = Calc.Qualification.Process();
                 Console.WriteLine("Qualifications:");
-                // Iterate through the dictionary and print each key-value pair.
                 foreach (var kvp in teamStatus)
                 {
-                    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+                    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
                 }
             }
 
-            if (iterations > 22)
+            if (numberOfRoundsPlayed > 22)
             {
                 // Initialize lists to store championship and relegation teams
-                List<string> championshipTeams = new List<string>();
-                List<string> relegationTeams = new List<string>();
+                List<string> championshipTeams = new();
+                List<string> relegationTeams = new();
 
                 // Compare each team's status and categorize them
                 foreach (string team in teams)
@@ -65,7 +72,8 @@ namespace Csv
                     }
                 }
 
-                for (int i = 1; i <= Math.Min(iterations-22, 10); i++) // Limit the loop to 10 iterations or 'iterations-22' if less
+                // Limit the loop to 10 numberOfRoundsPlayed or 'numberOfRoundsPlayed-22' if less
+                for (int i = 1; i <= Math.Min(numberOfRoundsPlayed - 22, 10); i++)
                 {
                     List<FootballMatch> championshipMatches = GenerateMatches(championshipTeams, i >= 5);
                     List<FootballMatch> relegationMatches = GenerateMatches(relegationTeams, i >= 5);
@@ -75,7 +83,7 @@ namespace Csv
                     string fullPath = Path.Combine(directoryPath, fileName);
                     string fullPathAlt = Path.Combine(directoryPath, fileNameAlt);
 
-                    WriteMatchesToFile(matches,fullPath,fileName,fullPathAlt,fileNameAlt);
+                    WriteMatchesToFile(matches, fullPath, fileName, fullPathAlt, fileNameAlt);
 
                     // Rotate the teams for the next round
                     RotateTeams(championshipTeams);
@@ -97,7 +105,7 @@ namespace Csv
 
         private static List<FootballMatch> GenerateMatches(List<string> teams, bool reverse)
         {
-            List<FootballMatch> matches = new List<FootballMatch>();
+            List<FootballMatch> matches = new();
             for (int i = 0; i < teams.Count / 2; i++)
             {
                 var home = teams[i];
@@ -115,19 +123,19 @@ namespace Csv
 
         private static void WriteMatchesToFile(List<FootballMatch> matches, string fullPath, string fileName, string fullPathAlt, string fileNameAlt)
         {
-            List<FootballMatch> otherMatches = new List<FootballMatch>();
+            List<FootballMatch> otherMatches = new();
             try
             {
                 // Create a new file and add match results
-                using (StreamWriter writer = new StreamWriter(fullPath, true))
+                using (StreamWriter writer = new(fullPath, true))
                 {
                     writer.WriteLine($"Home team;Away team;Score;Other");
                     foreach (var match in matches)
                     {
                         if (string.IsNullOrEmpty(match.Other))
-                        writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score}");
+                            writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score}");
                         else
-                        otherMatches.Add(match);
+                            otherMatches.Add(match);
                     }
                 }
 
@@ -136,7 +144,7 @@ namespace Csv
                 if (otherMatches.Count != 0)
                 {
                     // Create a new file and add match results
-                    using (StreamWriter writer = new StreamWriter(fullPathAlt, true))
+                    using (StreamWriter writer = new(fullPathAlt, true))
                     {
                         writer.WriteLine($"Home team;Away team;Score;Other");
                         foreach (var match in otherMatches)
@@ -154,7 +162,7 @@ namespace Csv
             }
         }
 
-        private static void DeleteFiles(string directoryPath)
+        private static void DeleteCSVFiles(string directoryPath)
         {
             // Check if the directory exists
             if (Directory.Exists(directoryPath))
