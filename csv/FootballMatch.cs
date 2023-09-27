@@ -16,7 +16,7 @@ namespace Csv
             Other = RollDiceOutcome(50);
         }
 
-        private string GenerateScore()
+        private static string GenerateScore()
         {
             Random random = new();
             int homeGoals = random.Next(0, 6); // for the sake of simplicity, the limit is 5 goals per team.
@@ -24,7 +24,7 @@ namespace Csv
             return $"{homeGoals}-{awayGoals}";
         }
 
-        private string RollDiceOutcome(int sides) // Takes die of different side values.
+        private static string RollDiceOutcome(int sides) // Takes die of different side values.
         {
             Random random = new();
             int roll = random.Next(1, sides+1); // Generates a random number between 1 and sides (inclusive).

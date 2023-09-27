@@ -2,42 +2,46 @@ namespace Csv
 {
     public class DataGenerator
     {
-        public static void GenerateData(int numberOfRoundsPlayed, string directoryPath = "./data/rounds")
+        // Generate rounds of football matches based on the number of rounds played.
+        public static void GenerateRounds(int numberOfRoundsPlayed, string directoryPath = "./data/rounds")
         {
-            Dictionary<string, string> teamStatus = new();
+            Dictionary<string, string> teamStatus = new(); // Initialize a dictionary to track team statuses
 
-            if (numberOfRoundsPlayed > 32) // Sets numberOfRoundsPlayed to 32 if larger.
+            // Ensure that the maximum number of rounds is capped at 32
+            if (numberOfRoundsPlayed > 32)
             {
                 numberOfRoundsPlayed = 32;
             }
 
-            // Deletes all .csv files in folder before creating new ones based on the current numberOfRoundsPlayed.
+            // Delete all existing .csv files in the specified directory before generating new ones
             DeleteCSVFiles(directoryPath);
 
-            List<string> teams = File.ReadAllLines("./data/teams.csv") // List of team abbreviations
+            // Load team abbreviations from a CSV file and initialize their points to zero
+            List<string> teams = File.ReadAllLines("./data/teams.csv")
                 .Skip(1)
                 .Select(line => line.Split(';')[0])
                 .ToList();
 
-            // Limit the loop to 22 numberOfRoundsPlayed or 'numberOfRoundsPlayed' if less
+            // Generate and write matches for regular rounds (up to 22 rounds)
             for (int i = 1; i <= Math.Min(numberOfRoundsPlayed, 22); i++)
             {
                 List<FootballMatch> matches = GenerateMatches(teams, i >= 11);
-                string fileName = $"round-{i}.csv";
-                string fileNameAlt = $"round-{i}-a.csv";
+                string fileName = $"round-{i}.csv"; // Regular rounds
+                string fileNameAlt = $"round-{i}-a.csv"; // Alternative rounds for postponed and cancelled games
                 string fullPath = Path.Combine(directoryPath, fileName);
                 string fullPathAlt = Path.Combine(directoryPath, fileNameAlt);
 
+                // Write matches to CSV files
                 WriteMatchesToFile(matches, fullPath, fileName, fullPathAlt, fileNameAlt);
 
                 // Rotate the teams for the next round
                 RotateTeams(teams);
             }
 
+            // After 22 rounds or more, calculate team qualification statuses
             if (numberOfRoundsPlayed >= 22)
             {
-                // Calculate the status after all numberOfRoundsPlayed
-                teamStatus = Calc.Qualification.Process();
+                teamStatus = Calc.Qualification.ProcessRounds();
                 Console.WriteLine("Qualifications:");
                 foreach (var kvp in teamStatus)
                 {
@@ -45,6 +49,7 @@ namespace Csv
                 }
             }
 
+            // Generate and write matches for championship and relegation rounds (up to 10 rounds each)
             if (numberOfRoundsPlayed > 22)
             {
                 // Initialize lists to store championship and relegation teams
@@ -72,7 +77,7 @@ namespace Csv
                     }
                 }
 
-                // Limit the loop to 10 numberOfRoundsPlayed or 'numberOfRoundsPlayed-22' if less
+                // Generate and write matches for championship and relegation rounds
                 for (int i = 1; i <= Math.Min(numberOfRoundsPlayed - 22, 10); i++)
                 {
                     List<FootballMatch> championshipMatches = GenerateMatches(championshipTeams, i >= 5);
@@ -83,16 +88,17 @@ namespace Csv
                     string fullPath = Path.Combine(directoryPath, fileName);
                     string fullPathAlt = Path.Combine(directoryPath, fileNameAlt);
 
+                    // Write matches to CSV files
                     WriteMatchesToFile(matches, fullPath, fileName, fullPathAlt, fileNameAlt);
 
                     // Rotate the teams for the next round
                     RotateTeams(championshipTeams);
                     RotateTeams(relegationTeams);
-
                 }
             }
         }
 
+        // Rotate a list of teams to simulate fixture rotation
         private static void RotateTeams(List<string> teams)
         {
             string temp = teams[teams.Count - 1];
@@ -103,6 +109,7 @@ namespace Csv
             teams[1] = temp;
         }
 
+        // Generate a list of football matches based on a list of teams
         private static List<FootballMatch> GenerateMatches(List<string> teams, bool reverse)
         {
             List<FootballMatch> matches = new();
@@ -121,6 +128,7 @@ namespace Csv
             return matches;
         }
 
+        // Write a list of football matches to CSV files
         private static void WriteMatchesToFile(List<FootballMatch> matches, string fullPath, string fileName, string fullPathAlt, string fileNameAlt)
         {
             List<FootballMatch> otherMatches = new();
@@ -162,6 +170,7 @@ namespace Csv
             }
         }
 
+        // Delete all .csv files in a specified directory
         private static void DeleteCSVFiles(string directoryPath)
         {
             // Check if the directory exists
