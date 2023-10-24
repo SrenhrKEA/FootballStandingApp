@@ -1,4 +1,6 @@
-namespace Model 
+using Utilities;
+
+namespace Models 
 {
     public class FootballMatch
     {
@@ -19,8 +21,8 @@ namespace Model
         private static string GenerateScore()
         {
             Random random = new();
-            int homeGoals = random.Next(0, 6); // for the sake of simplicity, the limit is 5 goals per team.
-            int awayGoals = random.Next(0, 6);
+            int homeGoals = random.Next(0, Constants.GoalLimit);
+            int awayGoals = random.Next(0, Constants.GoalLimit);
             return $"{homeGoals}-{awayGoals}";
         }
 

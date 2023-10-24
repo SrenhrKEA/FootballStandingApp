@@ -1,6 +1,7 @@
-using Model;
+using Models;
+using Utilities;
 
-namespace Service
+namespace Services
 {
     public class LoadData
     {
@@ -8,7 +9,7 @@ namespace Service
         {
             List<League> leagues = new();
 
-            foreach (var setupTuple in File.ReadAllLines("./data/setup.csv")
+            foreach (var setupTuple in File.ReadAllLines(Constants.GetSetupFilePath())
             .Skip(1)
             .Select(line => line
             .Split(';'))
@@ -32,7 +33,7 @@ namespace Service
         {
             List<Team> teams = new();
 
-            foreach (var teamTuple in File.ReadAllLines("./data/teams.csv")
+            foreach (var teamTuple in File.ReadAllLines(Constants.GetTeamsFilePath())
             .Skip(1)
             .Select(line => line
             .Split(';'))
@@ -47,6 +48,14 @@ namespace Service
                 teams.Add(team);
             }
             return teams;
+        }
+
+        public static Dictionary<string, int> LoadInitialTeamPoints()
+        {
+            return File.ReadAllLines(Constants.GetTeamsFilePath())
+                .Skip(1)
+                .Select(line => line.Split(';')[0])
+                .ToDictionary(abbreviation => abbreviation, abbreviation => 0);
         }
     }
 }

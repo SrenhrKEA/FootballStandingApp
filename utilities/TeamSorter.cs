@@ -1,6 +1,6 @@
-using Model;
+using Models;
 
-namespace Utility
+namespace Utilities
 {
     class TeamSorter
     {
