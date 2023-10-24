@@ -1,13 +1,12 @@
-using Services;
 using Utilities;
 
 namespace Services
 {
     public class Qualification
     {
-        public static Dictionary<string, string> ProcessRounds()
+        public static Dictionary<string, string> ProcessRounds(List<string> teams)
         {
-            var teamPoints = LoadData.LoadInitialTeamPoints();
+            Dictionary<string, int> teamPoints = teams.ToDictionary(abbreviation => abbreviation, abbreviation => 0);
 
             for (int i = 1; i <= Constants.NumberOfRoundsInRegularSeason; i++)
             {

@@ -5,7 +5,7 @@ namespace Services
 {
     public class LoadData
     {
-        public static List<League> Setup()
+        public static List<League> GetSetup()
         {
             List<League> leagues = new();
 
@@ -29,7 +29,7 @@ namespace Services
             return leagues;
         }
 
-        public static List<Team> Teams()
+        public static List<Team> GetTeams()
         {
             List<Team> teams = new();
 
@@ -48,14 +48,6 @@ namespace Services
                 teams.Add(team);
             }
             return teams;
-        }
-
-        public static Dictionary<string, int> LoadInitialTeamPoints()
-        {
-            return File.ReadAllLines(Constants.GetTeamsFilePath())
-                .Skip(1)
-                .Select(line => line.Split(';')[0])
-                .ToDictionary(abbreviation => abbreviation, abbreviation => 0);
         }
     }
 }

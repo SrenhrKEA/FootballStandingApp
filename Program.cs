@@ -11,6 +11,11 @@ class Program
 
         while (true) // This loop will keep the program running until the user decides to exit
         {
+            // Load data from setup.csv, teams.csv
+            List<League> leagues = LoadData.GetSetup();
+            League league = leagues[0];
+            List<Team> teams = LoadData.GetTeams();
+
             // Display options to the user
             Console.WriteLine("\nPlease choose an option:");
             Console.WriteLine("1. Generate new data");
@@ -31,7 +36,7 @@ class Program
                     }
 
                     // Generate data 
-                    DataGenerator.GenerateRounds(numberOfRoundsPlayed);
+                    DataGenerator.GenerateRounds(numberOfRoundsPlayed, teams);
                     break;
 
                 case "2":
@@ -48,12 +53,8 @@ class Program
                     continue; // Skip the rest of the loop and prompt the user again
             }
 
-            // Load data from setup.csv, teams.csv, and match result files.
-            List<League> leagues = LoadData.Setup();
-            League league = leagues[0];
-
             // Calculate standings based on match results.
-            List<Team> teams = Result.ProcessRounds();
+            teams = Result.ProcessRounds(teams);
 
             // Sort the standings based on your criteria.
             teams = TeamSorter.Sort(teams);
@@ -63,7 +64,7 @@ class Program
 
             Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
-            // Console.Clear(); // Clear the console for the next iteration
+            Console.Clear(); // Clear the console for the next iteration
         }
     }
 }

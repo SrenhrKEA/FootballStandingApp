@@ -6,9 +6,8 @@ namespace Services
     public class Result
     {
         // Process a specified number of rounds and return a list of teams with updated statistics.
-        public static List<Team> ProcessRounds()
+        public static List<Team> ProcessRounds(List<Team> teams)
         {
-            List<Team> teams = LoadData.Teams(); // Loads the teams from a data source
             var streaks = new Dictionary<string, Queue<string>>(); // Initialize a dictionary to track streaks for each team
 
             for (int i = 1; i <= Constants.MaxNumberOfRoundsInASeason; i++)

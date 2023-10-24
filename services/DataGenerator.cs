@@ -5,12 +5,11 @@ namespace Services
 {
     public class DataGenerator
     {
-        public static void GenerateRounds(int numberOfRoundsPlayed)
+        public static void GenerateRounds(int numberOfRoundsPlayed, List<Team> teams)
         {
             numberOfRoundsPlayed = Math.Min(numberOfRoundsPlayed, Constants.MaxNumberOfRoundsInASeason);
             DeleteCSVFiles(Constants.BaseRoundsPath);
-
-            List<string> teams = LoadTeams();
+            List<string> teamsByAbbrevation = GetTeamsByAbbreviation(teams);
 
             // Generate matches for both regular and postseason rounds.
             for (int i = 1; i <= numberOfRoundsPlayed; i++)
@@ -19,49 +18,46 @@ namespace Services
 
                 if (i <= Constants.NumberOfRoundsInRegularSeason)
                 {
-                    matches = GenerateMatches(teams, i >= Constants.NumberOfRoundsInRegularSeason / 2);
-                    RotateTeams(teams);
+                    matches = GenerateMatches(teamsByAbbrevation, i >= Constants.NumberOfRoundsInRegularSeason / 2);
+                    RotateTeams(teamsByAbbrevation);
                 }
                 else if (i == Constants.NumberOfRoundsInRegularSeason + 1)
                 {
-                    var teamStatus = Qualification.ProcessRounds();
-                    teams = CategorizeTeamsByStatus(teams, teamStatus);
-                    matches = GeneratePostSeasonMatches(teams);
+                    var teamStatus = Qualification.ProcessRounds(teamsByAbbrevation);
+                    teamsByAbbrevation = CategorizeTeamsByStatus(teamsByAbbrevation, teamStatus);
+                    matches = GeneratePostSeasonMatches(teamsByAbbrevation);
                 }
                 else
                 {
-                    matches = GeneratePostSeasonMatches(teams);
-                    RotateTeams(teams);
+                    matches = GeneratePostSeasonMatches(teamsByAbbrevation);
+                    RotateTeams(teamsByAbbrevation);
                 }
 
                 WriteMatchesToFile(matches, i);
             }
         }
-
-        private static List<string> LoadTeams()
+        private static List<string> GetTeamsByAbbreviation(List<Team> teams)
         {
-            return File.ReadAllLines(Constants.GetTeamsFilePath())
-                .Skip(1)
-                .Select(line => line.Split(';')[0])
-                .ToList();
+            return teams.Select(team => team.Abbreviation!).ToList();
         }
 
-        private static void RotateTeams(List<string> teams)
+
+        private static void RotateTeams(List<string> teamsByAbbrevation)
         {
-            var temp = teams[^1];
-            for (int i = teams.Count - 1; i > 1; i--)
-                teams[i] = teams[i - 1];
-            teams[1] = temp;
+            var temp = teamsByAbbrevation[^1];
+            for (int i = teamsByAbbrevation.Count - 1; i > 1; i--)
+                teamsByAbbrevation[i] = teamsByAbbrevation[i - 1];
+            teamsByAbbrevation[1] = temp;
         }
 
-        private static List<FootballMatch> GenerateMatches(List<string> teams, bool reverse)
+        private static List<FootballMatch> GenerateMatches(List<string> teamsByAbbrevation, bool reverse)
         {
             List<FootballMatch> matches = new();
-            int halfTeamCount = teams.Count / 2;
+            int halfTeamCount = teamsByAbbrevation.Count / 2;
             for (int i = 0; i < halfTeamCount; i++)
             {
-                var home = teams[i];
-                var away = teams[teams.Count - 1 - i];
+                var home = teamsByAbbrevation[i];
+                var away = teamsByAbbrevation[teamsByAbbrevation.Count - 1 - i];
 
                 if (reverse)
                     (home, away) = (away, home);
@@ -71,12 +67,12 @@ namespace Services
             return matches;
         }
 
-        private static List<FootballMatch> GeneratePostSeasonMatches(List<string> teams)
+        private static List<FootballMatch> GeneratePostSeasonMatches(List<string> teamsByAbbrevation)
         {
             // Assuming teams list contains Championship teams followed by Relegation teams.
-            var halfCount = teams.Count / 2;
-            var championshipTeams = teams.GetRange(0, halfCount);
-            var relegationTeams = teams.GetRange(halfCount, halfCount);
+            var halfCount = teamsByAbbrevation.Count / 2;
+            var championshipTeams = teamsByAbbrevation.GetRange(0, halfCount);
+            var relegationTeams = teamsByAbbrevation.GetRange(halfCount, halfCount);
 
             var champMatches = GenerateMatches(championshipTeams, false);
             var relegMatches = GenerateMatches(relegationTeams, false);
@@ -86,31 +82,56 @@ namespace Services
 
         private static void WriteMatchesToFile(List<FootballMatch> matches, int roundNumber)
         {
-            var fileName = $"round-{roundNumber}.csv";
-            var fullPath = Path.Combine(Constants.BaseRoundsPath, fileName);
+            var baseFileName = $"round-{roundNumber}";
+            var mainFilePath = Path.Combine(Constants.BaseRoundsPath, $"{baseFileName}.csv");
+            var altFilePath = Path.Combine(Constants.BaseRoundsPath, $"{baseFileName}-a.csv");
+
+            List<FootballMatch> otherMatches = new();
 
             try
             {
-                using StreamWriter writer = new(fullPath);
-                writer.WriteLine("Home team;Away team;Score;Other");
+                using (StreamWriter writer = new(mainFilePath, true))
+                {
+                    writer.WriteLine("Home team;Away team;Score;Other");
+                    foreach (var match in matches)
+                    {
+                        if (string.IsNullOrEmpty(match.Other))
+                            writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score}");
+                        else
+                            otherMatches.Add(match);
+                    }
+                }
+                Console.WriteLine($"File {baseFileName}.csv created successfully!");
 
-                foreach (var match in matches)
-                    writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score};{match.Other}");
-
-                Console.WriteLine($"File {fileName} created successfully!");
+                if (otherMatches.Any())
+                {
+                    WriteToFileWithOtherInfo(altFilePath, otherMatches);
+                    Console.WriteLine($"File {baseFileName}-a.csv created successfully!");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating file {fileName}. Error: {ex.Message}");
+                Console.WriteLine($"Error creating file {baseFileName}-a.csv. Error: {ex.Message}");
             }
         }
 
-        private static List<string> CategorizeTeamsByStatus(List<string> teams, Dictionary<string, string> teamStatus)
+        private static void WriteToFileWithOtherInfo(string filePath, List<FootballMatch> matches)
+        {
+            using StreamWriter writer = new(filePath, true);
+            writer.WriteLine("Home team;Away team;Score;Other");
+            foreach (var match in matches)
+            {
+                writer.WriteLine($"{match.HomeTeam};{match.AwayTeam};{match.Score};{match.Other}");
+            }
+        }
+
+
+        private static List<string> CategorizeTeamsByStatus(List<string> teamsByAbbrevation, Dictionary<string, string> teamStatus)
         {
             var championshipTeams = new List<string>();
             var relegationTeams = new List<string>();
 
-            foreach (var team in teams)
+            foreach (var team in teamsByAbbrevation)
             {
                 if (teamStatus.TryGetValue(team, out var status))
                 {

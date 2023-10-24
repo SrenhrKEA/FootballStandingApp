@@ -37,7 +37,7 @@ namespace Models
                 case int r when r == Constants.TotalOutcomes:
                     return "Cancelled";
                 default:
-                    return "Proceed";
+                    return "";
             }
         }
     }
