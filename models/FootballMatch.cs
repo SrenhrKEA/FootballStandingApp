@@ -1,48 +1,43 @@
 using Utilities;
 
-namespace Models 
+namespace Models
 {
     public class FootballMatch
     {
-        public string HomeTeam { get; set; }
-        public string AwayTeam { get; set; }
-        public string Score { get; set; }
-        public string Other { get; set; }
+        public string HomeTeam { get; }
+        public string AwayTeam { get; }
+        public string Score { get; }
+        public string Other { get; }
 
+        private static readonly Random Random = new Random();
 
         public FootballMatch(string homeTeam, string awayTeam)
         {
             HomeTeam = homeTeam;
             AwayTeam = awayTeam;
             Score = GenerateScore();
-            Other = RollDiceOutcome(50);
+            Other = GenerateOutcome();
         }
 
         private static string GenerateScore()
         {
-            Random random = new();
-            int homeGoals = random.Next(0, Constants.GoalLimit);
-            int awayGoals = random.Next(0, Constants.GoalLimit);
+            int homeGoals = Random.Next(0, Constants.GoalLimit);
+            int awayGoals = Random.Next(0, Constants.GoalLimit);
             return $"{homeGoals}-{awayGoals}";
         }
 
-        private static string RollDiceOutcome(int sides) // Takes die of different side values.
+        private static string GenerateOutcome()
         {
-            Random random = new();
-            int roll = random.Next(1, sides+1); // Generates a random number between 1 and sides (inclusive).
+            int result = Random.Next(1, Constants.TotalOutcomes + 1); // Generates a random number.
 
-            if (roll == sides-1 || roll == sides-2)
+            switch (result)
             {
-                return "Postponed";
-            }
-            else if (roll == sides)
-            {
-                return "Cancelled";
-            }
-            else
-            {
-                // Nothing happens.
-                return null!;
+                case int r when r == Constants.TotalOutcomes - 1 || r == Constants.TotalOutcomes - 2:
+                    return "Postponed";
+                case int r when r == Constants.TotalOutcomes:
+                    return "Cancelled";
+                default:
+                    return "Proceed";
             }
         }
     }
