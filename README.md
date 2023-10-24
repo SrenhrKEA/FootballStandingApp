@@ -3,38 +3,27 @@
 ## Description
 This program is part of a school assignment and is  designed to manage and display sports league standings based on match results. It offers functionality to generate sample data, load data from CSV files, calculate standings, sort teams, and display the standings in a visually appealing format.
 
+## Features
+
+- **Data Generation:** Users can generate match data for a specified number of rounds.
+- **Data Loading:** The program can load existing match data from specified CSV files.
+- **Standings Calculation:** Based on match results, the program calculates the standings of the teams.
+- **Standings Display:** View the standings in a sorted and formatted manner, with attention to detail and aesthetics.
+
 ## Usage
-### Step 1: Generate Data
-```
-int numberOfRoundsPlayed = 32; // Set the desired number of rounds
-DataGenerator.GenerateRounds(numberOfRoundsPlayed);
-```
-This step generates sample match data for the league. You can adjust the number of rounds played as needed.
 
-### Step 2: Load Data
-```
-List<League> leagues = LoadData.Setup();
-League league = leagues[0]; // Currently, the program handles a single league.
-```
-Load data from setup.csv, teams.csv, and match result files. The program currently supports a single league. Make sure the necessary CSV files are present and correctly formatted.
+1. **Start the Program:** Upon launching, you will be greeted with a welcome message.
+2. **Choose Data Option:** You can either:
+   - Generate new match data by specifying the number of rounds.
+   - Use existing match data.
+3. **View Standings:** The program will process the data, calculate the standings, and display them.
+4. **Rerun or Exit:** After viewing the standings, you can choose to rerun with new or existing data, or exit the program.
 
-### Step 3: Calculate Standings
-```
-List<Team> teams = Result.ProcessRounds();
-```
-Calculate the league standings based on the match results.
+## Data Files
 
-### Step 4: Sort Standings
-```
-teams = TeamSorter.Sort(teams);
-```
-Sort the league standings based on your desired criteria. Modify the sorting logic in TeamSorter as needed.
-
-### Step 5: Display Standings
-```
-DisplayManager.DisplayTeams(teams, league);
-```
-Display the league standings with formatting and colors. The DisplayManager class handles the presentation of the standings.
+- `setup.csv`: Contains league setup information.
+- `teams.csv`: Contains team data for the league.
+- Match Result Files: Contains results of the matches played.
 
 ## Notes
 The program is currently set up to handle a single league. Extending it to support multiple leagues would require adjustments to the data structure and codebase.
